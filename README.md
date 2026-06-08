@@ -8,7 +8,7 @@ For every non-suppressed MARC bibliographic instance whose SRS record contains a
 
 1. **Suppresses existing holdings** and marks them with the `delete-h` statistical code. Holdings that have an attached purchase order are left untouched and logged separately.
 2. **Creates a new Electronic holdings record** for each unique Coral ID found in the 856 fields, populated from two mapping spreadsheets in `.claudedoc/`.
-3. **Removes the 856 fields** from the SRS record (unless `--keep-856` is passed).
+3. **Removes the coral 856 fields** from the SRS record and triggers re-derivation of the FOLIO instance record via the change-manager API, so the instance's electronic access fields reflect the deletion (unless `--keep-856` is passed).
 
 ## Prerequisites
 
@@ -77,4 +77,4 @@ All three files are in append mode; each run adds to the existing content.
 
 ## Data sources
 
-The mapping spreadsheets live in `.claudedoc/` and are not committed to the repository. They map each Coral ID to the holdings field values (provider, access method, ILL policy, call number type, etc.). Two Coral IDs have conditional logic based on the value of `856$x`; this is handled automatically.
+The two mapping spreadsheets (`Conversion Worksheet 2 - 1 - Mapping from 856$w.csv` and `Conversion Worksheet 2 - 2 - Mapping from 856$w.csv`) live in the project root and are not committed to the repository. They map each Coral ID to the holdings field values (provider, access method, ILL policy, call number type, etc.). Two Coral IDs have conditional logic based on the value of `856$x`; this is handled automatically.

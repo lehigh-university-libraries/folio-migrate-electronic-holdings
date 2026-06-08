@@ -222,16 +222,29 @@ def process_source_record(
         fc.folio_post("/holdings-storage/holdings", payload=holdings)
         log.info("Created holdings for %s on instance %s", coral_id, instance_hrid)
 
-    # Step 3: Optionally remove 856 fields from the SRS record
+    # Step 3: Remove coral 856 fields from SRS, then trigger instance re-derivation
     if not args.keep_856:
         updated = srs_utils.strip_coral_856_fields(source_record)
         srs_id = source_record["id"]
         fc.folio_put(f"/source-storage/records/{srs_id}", payload=updated)
-        log.info(
-            "Stripped 856 fields from SRS record %s (instance %s)",
-            srs_id,
-            instance_hrid,
+        log.info("Stripped 856 fields from SRS record %s (instance %s)", srs_id, instance_hrid)
+
+        parsed_record = fc.folio_get(
+            "/change-manager/parsedRecords",
+            query_params={"externalId": instance_id},
         )
+        if parsed_record:
+            parsed_record["relatedRecordVersion"] = str(instance.get("_version"))
+            pr_id = parsed_record.get("id")
+            fc.folio_put(
+                f"/change-manager/parsedRecords/{pr_id}",
+                payload=parsed_record,
+            )
+            log.info("Re-derivation triggered for instance %s", instance_hrid)
+        else:
+            log.warning(
+                "No parsed record found via change-manager for instance %s", instance_hrid
+            )
 
     return "processed"
 
