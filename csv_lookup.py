@@ -27,16 +27,11 @@ Sheet 2 columns (same header structure):
 """
 
 import csv
-import os
 from dataclasses import dataclass
 
 
-SHEET1_PATH = os.path.join(
-    ".claudedoc", "Conversion Worksheet 2 - 1 - Mapping from 856$w.csv"
-)
-SHEET2_PATH = os.path.join(
-    ".claudedoc", "Conversion Worksheet 2 - 2 - Mapping from 856$w.csv"
-)
+SHEET1_PATH = "Conversion Worksheet 2 - 1 - Mapping from 856$w.csv"
+SHEET2_PATH = "Conversion Worksheet 2 - 2 - Mapping from 856$w.csv"
 
 # Sentinel in sheet 1 access_method meaning "use the actual 856$x value"
 _X_SENTINEL = "{856$x}"
