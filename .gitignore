@@ -1,0 +1,8 @@
+.claudedoc
+.env
+*.log
+migration_state.json
+__pycache__/
+*.pyc
+.venv/
+venv/

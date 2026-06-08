@@ -1,0 +1,2 @@
+folioclient
+python-dotenv
