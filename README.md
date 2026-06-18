@@ -6,7 +6,7 @@ One-time migration utility that converts MARC 856 fields into proper FOLIO Elect
 
 For every non-suppressed MARC bibliographic instance whose SRS record contains at least one `856$w` starting with `coral`:
 
-1. **Suppresses existing holdings** and marks them with the `delete-h` statistical code. Holdings that have an attached purchase order are left untouched and logged separately.
+1. **Suppresses existing holdings** and marks them with the a statistical code. Holdings that have an attached purchase order are suppressed but not marked with the code; they are logged separately in `po_holdings.log`.
 2. **Creates a new Electronic holdings record** for each unique Coral ID found in the 856 fields, populated from two mapping spreadsheets in `.claudedoc/`.
 3. **Removes the coral 856 fields** from the SRS record and triggers re-derivation of the FOLIO instance record via the change-manager API, so the instance's electronic access fields reflect the deletion (unless `--keep-856` is passed).
 
@@ -24,18 +24,13 @@ pip install -r requirements.txt
 
 The following must exist in your FOLIO instance before running:
 
-**Holdings note types** (Settings → Inventory → Holdings note types):
-- `E Resource coral identifier`
-- `E Resource provider`
-- `E Resource provider code`
-- `E Resource access method`
-- `E Resource access method code`
+**Holdings note types** (Settings → Inventory → Holdings note types) — see `NOTE_*` constants in `folio_setup.py` for exact names.
 
 **Other reference data** — these are standard and should already exist:
 - Holdings type: `Electronic`
 - Location: `Electronic`
 - Call number type: `Other scheme`
-- Statistical code: `delete-h`
+- Statistical code: see `STATISTICAL_CODE_DELETE_H` in `folio_setup.py`.
 - Electronic access relationship: `Resource`
 - Holdings source: `FOLIO`
 

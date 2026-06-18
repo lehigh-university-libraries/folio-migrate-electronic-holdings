@@ -11,6 +11,14 @@ load_dotenv()
 
 log = logging.getLogger(__name__)
 
+STATISTICAL_CODE_DELETE_HOLDING = "eresource-holding-delete"
+
+NOTE_CORAL_ID = "EResource Coral Identifier"
+NOTE_PROVIDER = "EResource Provider"
+NOTE_PROVIDER_CODE = "EResource Provider Code"
+NOTE_ACCESS_METHOD = "EResource Access Method"
+NOTE_ACCESS_METHOD_CODE = "EResource Access Method Code"
+
 
 def build_client():
     return FolioClient(
@@ -37,7 +45,11 @@ def load_ref_data(fc):
         fc, "/call-number-types", "callNumberTypes", "Other scheme"
     )
     ref["statistical_code_delete_h"] = _lookup_id(
-        fc, "/statistical-codes", "statisticalCodes", "delete-h", field="code"
+        fc,
+        "/statistical-codes",
+        "statisticalCodes",
+        STATISTICAL_CODE_DELETE_HOLDING,
+        field="code",
     )
     ref["holdings_source_folio"] = _lookup_id(
         fc, "/holdings-sources", "holdingsRecordsSources", "FOLIO"

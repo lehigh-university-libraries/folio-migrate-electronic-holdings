@@ -7,16 +7,16 @@ with one electronicAccess entry per $u URI.
 
 import logging
 
+from folio_setup import (
+    NOTE_CORAL_ID,
+    NOTE_PROVIDER,
+    NOTE_PROVIDER_CODE,
+    NOTE_ACCESS_METHOD,
+    NOTE_ACCESS_METHOD_CODE,
+)
 from srs_utils import get_subfield, get_all_subfields
 
 log = logging.getLogger(__name__)
-
-# Note type names that must exist in FOLIO Settings > Inventory > Holdings note types
-_NOTE_CORAL_ID = "E Resource coral identifier"
-_NOTE_PROVIDER = "E Resource provider"
-_NOTE_PROVIDER_CODE = "E Resource provider code"
-_NOTE_ACCESS_METHOD = "E Resource access method"
-_NOTE_ACCESS_METHOD_CODE = "E Resource access method code"
 
 
 def build_holdings_record(instance_id, coral_id, fields_856, collection_row, ref_data):
@@ -55,15 +55,15 @@ def _build_notes(coral_id, row, ref_data):
     note_types = ref_data["holdings_note_types"]
     notes = []
 
-    _add_note(notes, note_types, _NOTE_CORAL_ID, coral_id)
-    _add_note(notes, note_types, _NOTE_PROVIDER, row.provider)
-    _add_note(notes, note_types, _NOTE_PROVIDER_CODE, row.provider_code)
+    _add_note(notes, note_types, NOTE_CORAL_ID, coral_id)
+    _add_note(notes, note_types, NOTE_PROVIDER, row.provider)
+    _add_note(notes, note_types, NOTE_PROVIDER_CODE, row.provider_code)
 
     if row.is_ebook:
         if row.access_method:
-            _add_note(notes, note_types, _NOTE_ACCESS_METHOD, row.access_method)
+            _add_note(notes, note_types, NOTE_ACCESS_METHOD, row.access_method)
         if row.access_method_code:
-            _add_note(notes, note_types, _NOTE_ACCESS_METHOD_CODE, row.access_method_code)
+            _add_note(notes, note_types, NOTE_ACCESS_METHOD_CODE, row.access_method_code)
 
     return notes
 

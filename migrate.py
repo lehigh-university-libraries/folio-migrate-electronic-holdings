@@ -149,9 +149,7 @@ def _coral_holdings_exists(fc, instance_id, coral_id, ref_data):
             "limit": 200,
         },
     )
-    note_type_id = ref_data["holdings_note_types"].get(
-        "E Resource coral identifier", ""
-    )
+    note_type_id = ref_data["holdings_note_types"].get(folio_setup.NOTE_CORAL_ID, "")
     for h in existing:
         for note in h.get("notes", []):
             if (
@@ -257,12 +255,10 @@ def _suppress_existing_holdings(fc, instance_id, instance_hrid, ref_data, po_fh)
         hid = holdings["id"]
         hhrid = holdings.get("hrid", hid)
 
-        if _holdings_has_po(fc, hid):
-            log.warning(
-                "Holdings %s (%s) on instance %s has a PO — skipping suppression",
+                "Holdings %s on instance %s has a PO — suppressing without %s statistical code",
                 hhrid,
-                hid,
                 instance_hrid,
+                folio_setup.STATISTICAL_CODE_DELETE_HOLDING,
             )
             po_fh.write(f"{instance_hrid}\t{hhrid}\n")
             po_fh.flush()
