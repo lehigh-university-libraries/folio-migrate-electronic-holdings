@@ -66,7 +66,7 @@ The full run is resumable: if it is interrupted, re-running `python migrate.py` 
 |------|----------|
 | `migration.log` | Full run log (append mode) |
 | `unmatched_coral.log` | Instance HRIDs and Coral IDs that were not found in the mapping spreadsheets — review and handle manually |
-| `po_holdings.log` | Instance and holdings HRIDs that were skipped because a purchase order is attached |
+| `po_holdings.log` | Instance and holdings HRIDs that were suppressed without the statistical code because a purchase order is attached |
 
 All three files are in append mode; each run adds to the existing content.
 

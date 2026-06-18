@@ -255,6 +255,9 @@ def _suppress_existing_holdings(fc, instance_id, instance_hrid, ref_data, po_fh)
         hid = holdings["id"]
         hhrid = holdings.get("hrid", hid)
 
+        has_po = _holdings_has_po(fc, hid)
+        if has_po:
+            log.info(
                 "Holdings %s on instance %s has a PO — suppressing without %s statistical code",
                 hhrid,
                 instance_hrid,
@@ -262,12 +265,12 @@ def _suppress_existing_holdings(fc, instance_id, instance_hrid, ref_data, po_fh)
             )
             po_fh.write(f"{instance_hrid}\t{hhrid}\n")
             po_fh.flush()
-            continue
+        else:
+            codes = holdings.get("statisticalCodeIds", [])
+            if delete_h_code not in codes:
+                codes.append(delete_h_code)
+            holdings["statisticalCodeIds"] = codes
 
-        codes = holdings.get("statisticalCodeIds", [])
-        if delete_h_code not in codes:
-            codes.append(delete_h_code)
-        holdings["statisticalCodeIds"] = codes
         holdings["discoverySuppress"] = True
         fc.folio_put(
             f"/holdings-storage/holdings/{hid}",
