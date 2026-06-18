@@ -6,17 +6,7 @@ descriptor row, so we read by column position rather than by name.
 
 Sheet 1 columns (row 0 = main header, row 1 = sub-header, rows 2+ = data):
   0  MARC 856$w
-  1  E Resource coral identifier
-  2  E Resource provider
-  3  E Resource provider code
-  4  E Resource access method
-  5  E Resource access method code
-  6  Call Number
-  7  ILL Policy
-
-Sheet 2 columns (same header structure):
-  0  MARC 856$w
-  1  MARC 856$x  (condition: "Unlimited" or "{856 $x} is not equal to 'Unlimited'")
+  1  Copy number
   2  E Resource coral identifier
   3  E Resource provider
   4  E Resource provider code
@@ -24,6 +14,18 @@ Sheet 2 columns (same header structure):
   6  E Resource access method code
   7  Call Number
   8  ILL Policy
+
+Sheet 2 columns (same header structure):
+  0  MARC 856$w
+  1  Copy number
+  2  MARC 856$x  (condition: "Unlimited" or "{856 $x} is not equal to 'Unlimited'")
+  3  E Resource coral identifier
+  4  E Resource provider
+  5  E Resource provider code
+  6  E Resource access method
+  7  E Resource access method code
+  8  Call Number
+  9  ILL Policy
 """
 
 import csv
@@ -41,6 +43,7 @@ _X_SENTINEL = "{856$x}"
 class CollectionRow:
     coral_id: str
     call_number: str        # "Electronic book" or "Streaming video"
+    copy_number: str        # "" when not specified
     provider: str
     provider_code: str
     access_method: str      # "" for streaming video
@@ -78,12 +81,13 @@ def load_collections(sheet1_path=SHEET1_PATH, sheet2_path=SHEET2_PATH):
             continue
         sheet1[cid] = CollectionRow(
             coral_id=cid,
-            call_number=_cell(row, 6),
-            provider=_cell(row, 2),
-            provider_code=_cell(row, 3),
-            access_method=_cell(row, 4),
-            access_method_code=_cell(row, 5),
-            ill_policy=_cell(row, 7),
+            call_number=_cell(row, 7),
+            copy_number=_cell(row, 1),
+            provider=_cell(row, 3),
+            provider_code=_cell(row, 4),
+            access_method=_cell(row, 5),
+            access_method_code=_cell(row, 6),
+            ill_policy=_cell(row, 8),
         )
 
     # Sheet 2: two rows per coral_id keyed by whether $x == "Unlimited"
@@ -92,15 +96,16 @@ def load_collections(sheet1_path=SHEET1_PATH, sheet2_path=SHEET2_PATH):
         cid = _cell(row, 0)
         if not cid:
             continue
-        x_cond = _cell(row, 1)
+        x_cond = _cell(row, 2)
         parsed = CollectionRow(
             coral_id=cid,
-            call_number=_cell(row, 7),
-            provider=_cell(row, 3),
-            provider_code=_cell(row, 4),
-            access_method=_cell(row, 5),
-            access_method_code=_cell(row, 6),
-            ill_policy=_cell(row, 8),
+            call_number=_cell(row, 8),
+            copy_number=_cell(row, 1),
+            provider=_cell(row, 4),
+            provider_code=_cell(row, 5),
+            access_method=_cell(row, 6),
+            access_method_code=_cell(row, 7),
+            ill_policy=_cell(row, 9),
         )
         if cid not in sheet2:
             sheet2[cid] = {}
@@ -138,6 +143,7 @@ class CollectionLookup:
                 return CollectionRow(
                     coral_id=row.coral_id,
                     call_number=row.call_number,
+                    copy_number=row.copy_number,
                     provider=row.provider,
                     provider_code=row.provider_code,
                     access_method=x_value or "",
@@ -152,6 +158,7 @@ class CollectionLookup:
                 return CollectionRow(
                     coral_id=row.coral_id,
                     call_number=row.call_number,
+                    copy_number=row.copy_number,
                     provider=row.provider,
                     provider_code=row.provider_code,
                     access_method=x_value or "",

@@ -39,6 +39,7 @@ def build_holdings_record(instance_id, coral_id, fields_856, collection_row, ref
         "permanentLocationId": ref_data["location_electronic"],
         "callNumberTypeId": ref_data["call_number_type_other"],
         "callNumber": collection_row.call_number,
+        "copyNumber": collection_row.copy_number,
         "sourceId": ref_data["holdings_source_folio"],
         "discoverySuppress": False,
         "notes": notes,
