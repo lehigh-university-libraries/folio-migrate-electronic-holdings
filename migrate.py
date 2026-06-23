@@ -185,6 +185,23 @@ def process_source_record(
         log.debug("Skipping suppressed instance %s (%s)", instance_hrid, instance_id)
         return "skipped"
 
+    # Pre-check: skip the instance entirely if no coral ID is in the spreadsheets
+    groups = srs_utils.group_856_by_coral_id(parsed)
+    matched = {
+        cid: collections.lookup(cid, srs_utils.get_subfield(fields[0], "x") or "")
+        for cid, fields in groups.items()
+    }
+    if not any(matched.values()):
+        log.warning(
+            "No spreadsheet match for any coral ID on instance %s — skipping: %s",
+            instance_hrid,
+            ", ".join(matched),
+        )
+        for coral_id in matched:
+            unmatched_fh.write(f"{instance_hrid}\t{coral_id}\n")
+        unmatched_fh.flush()
+        return "skipped"
+
     if args.dry_run:
         log.info("[DRY-RUN] Would process instance %s (%s)", instance_hrid, instance_id)
         return "processed"
@@ -192,11 +209,9 @@ def process_source_record(
     # Step 1: Suppress existing holdings (skip any that have a PO)
     _suppress_existing_holdings(fc, instance_id, instance_hrid, ref_data, po_fh)
 
-    # Step 2: Group 856s by coral ID and create new Electronic holdings
-    groups = srs_utils.group_856_by_coral_id(parsed)
+    # Step 2: Create new Electronic holdings for each matched coral ID
     for coral_id, group_fields in groups.items():
-        x_value = srs_utils.get_subfield(group_fields[0], "x") or ""
-        collection_row = collections.lookup(coral_id, x_value)
+        collection_row = matched[coral_id]
 
         if collection_row is None:
             log.warning(
