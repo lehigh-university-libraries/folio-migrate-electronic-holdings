@@ -11,7 +11,7 @@ load_dotenv()
 
 log = logging.getLogger(__name__)
 
-STATISTICAL_CODE_DELETE_HOLDING = "eresource-holding-delete"
+STATISTICAL_CODE_DELETE_HOLDING = "delete-eresource-holding"
 
 NOTE_CORAL_ID = "EResource Coral Identifier"
 NOTE_PROVIDER = "EResource Provider"
