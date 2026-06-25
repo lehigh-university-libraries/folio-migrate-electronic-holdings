@@ -47,7 +47,7 @@ class CollectionRow:
     call_number: str        # "Electronic book" or "Streaming video"
     copy_number: str        # "" when not specified
     package_name: str
-    provider: str
+    provider_name: str
     provider_code: str
     access_method: str      # "" for streaming video
     access_method_code: str # "" for streaming video
@@ -87,7 +87,7 @@ def load_collections(sheet1_path=SHEET1_PATH, sheet2_path=SHEET2_PATH):
             call_number=_cell(row, 8),
             copy_number=_cell(row, 1),
             package_name=_cell(row, 3),
-            provider=_cell(row, 4),
+            provider_name=_cell(row, 4),
             provider_code=_cell(row, 5),
             access_method=_cell(row, 6),
             access_method_code=_cell(row, 7),
@@ -106,7 +106,7 @@ def load_collections(sheet1_path=SHEET1_PATH, sheet2_path=SHEET2_PATH):
             call_number=_cell(row, 9),
             copy_number=_cell(row, 1),
             package_name=_cell(row, 4),
-            provider=_cell(row, 5),
+            provider_name=_cell(row, 5),
             provider_code=_cell(row, 6),
             access_method=_cell(row, 7),
             access_method_code=_cell(row, 8),
@@ -150,7 +150,7 @@ class CollectionLookup:
                     call_number=row.call_number,
                     copy_number=row.copy_number,
                     package_name=row.package_name,
-                    provider=row.provider,
+                    provider_name=row.provider_name,
                     provider_code=row.provider_code,
                     access_method=x_value or "",
                     access_method_code=row.access_method_code,
@@ -166,7 +166,7 @@ class CollectionLookup:
                     call_number=row.call_number,
                     copy_number=row.copy_number,
                     package_name=row.package_name,
-                    provider=row.provider,
+                    provider_name=row.provider_name,
                     provider_code=row.provider_code,
                     access_method=x_value or "",
                     access_method_code=row.access_method_code,
