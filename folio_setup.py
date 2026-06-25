@@ -15,7 +15,7 @@ STATISTICAL_CODE_DELETE_HOLDING = "delete-eresource-holding"
 
 NOTE_CORAL_ID = "EResource Coral Identifier"
 NOTE_PACKAGE_NAME = "EResource Package Name"
-NOTE_PROVIDER = "EResource Provider"
+NOTE_PROVIDER = "EResource Provider Name"
 NOTE_PROVIDER_CODE = "EResource Provider Code"
 NOTE_ACCESS_METHOD = "EResource Access Method"
 NOTE_ACCESS_METHOD_CODE = "EResource Access Method Code"
