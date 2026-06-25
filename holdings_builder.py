@@ -6,6 +6,7 @@ with one electronicAccess entry per $u URI.
 """
 
 import logging
+import os
 
 from folio_setup import (
     NOTE_CORAL_ID,
@@ -87,6 +88,9 @@ def _add_note(notes, note_types, type_name, value):
     })
 
 
+_INCLUDE_PUBLIC_NOTE = os.environ.get("INCLUDE_856_PUBLIC_NOTE", "true").lower() == "true"
+
+
 def _build_electronic_access(fields_856, ref_data):
     """One electronicAccess entry per 856 $u, across all fields in the group."""
     relationship_id = ref_data["ea_relationship_resource"]
@@ -94,7 +98,7 @@ def _build_electronic_access(fields_856, ref_data):
 
     for f856 in fields_856:
         uris = get_all_subfields(f856, "u")
-        public_note = get_subfield(f856, "z") or ""
+        public_note = get_subfield(f856, "z") or "" if _INCLUDE_PUBLIC_NOTE else ""
 
         for uri in uris:
             entry = {
