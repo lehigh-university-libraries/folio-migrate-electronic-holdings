@@ -9,6 +9,7 @@ import logging
 
 from folio_setup import (
     NOTE_CORAL_ID,
+    NOTE_PACKAGE_NAME,
     NOTE_PROVIDER,
     NOTE_PROVIDER_CODE,
     NOTE_ACCESS_METHOD,
@@ -57,6 +58,7 @@ def _build_notes(coral_id, row, ref_data):
     notes = []
 
     _add_note(notes, note_types, NOTE_CORAL_ID, coral_id)
+    _add_note(notes, note_types, NOTE_PACKAGE_NAME, row.package_name)
     _add_note(notes, note_types, NOTE_PROVIDER, row.provider)
     _add_note(notes, note_types, NOTE_PROVIDER_CODE, row.provider_code)
 
