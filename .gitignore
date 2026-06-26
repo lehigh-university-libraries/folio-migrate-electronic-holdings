@@ -1,4 +1,5 @@
 .claudedoc
+.vscode
 .env
 *.log
 migration_state.json

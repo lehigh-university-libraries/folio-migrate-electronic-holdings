@@ -33,7 +33,6 @@ Sheet 2 columns (same header structure):
 import csv
 from dataclasses import dataclass
 
-
 SHEET1_PATH = "Conversion Worksheet 2 - 1 - Mapping from 856$w.csv"
 SHEET2_PATH = "Conversion Worksheet 2 - 2 - Mapping from 856$w.csv"
 
@@ -44,14 +43,14 @@ _X_SENTINEL = "{856$x}"
 @dataclass
 class CollectionRow:
     coral_id: str
-    call_number: str        # "Electronic book" or "Streaming video"
-    copy_number: str        # "" when not specified
+    call_number: str  # "Electronic book" or "Streaming video"
+    copy_number: str  # "" when not specified
     package_name: str
     provider_name: str
     provider_code: str
-    access_method: str      # "" for streaming video
-    access_method_code: str # "" for streaming video
-    ill_policy: str         # "" when not specified
+    access_method: str  # "" for streaming video
+    access_method_code: str  # "" for streaming video
+    ill_policy: str  # "" when not specified
 
     @property
     def is_ebook(self):
@@ -114,7 +113,7 @@ def load_collections(sheet1_path=SHEET1_PATH, sheet2_path=SHEET2_PATH):
         )
         if cid not in sheet2:
             sheet2[cid] = {}
-        if x_cond == "Unlimited":
+        if x_cond == "Unlimited Access":
             sheet2[cid]["Unlimited"] = parsed
         else:
             sheet2[cid]["not_unlimited"] = parsed
