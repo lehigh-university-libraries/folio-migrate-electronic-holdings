@@ -67,7 +67,9 @@ def _build_notes(coral_id, row, ref_data):
         if row.access_method:
             _add_note(notes, note_types, NOTE_ACCESS_METHOD, row.access_method)
         if row.access_method_code:
-            _add_note(notes, note_types, NOTE_ACCESS_METHOD_CODE, row.access_method_code)
+            _add_note(
+                notes, note_types, NOTE_ACCESS_METHOD_CODE, row.access_method_code
+            )
 
     return notes
 
@@ -81,14 +83,18 @@ def _add_note(notes, note_types, type_name, value):
             f"Holdings note type not found in FOLIO: {type_name!r}. "
             "Create it in Settings > Inventory > Holdings note types."
         )
-    notes.append({
-        "holdingsNoteTypeId": note_type_id,
-        "note": value,
-        "staffOnly": False,
-    })
+    notes.append(
+        {
+            "holdingsNoteTypeId": note_type_id,
+            "note": value,
+            "staffOnly": False,
+        }
+    )
 
 
-_INCLUDE_PUBLIC_NOTE = os.environ.get("INCLUDE_856_PUBLIC_NOTE", "true").lower() == "true"
+_INCLUDE_PUBLIC_NOTE = (
+    os.environ.get("INCLUDE_856_PUBLIC_NOTE", "true").lower() == "true"
+)
 
 
 def _build_electronic_access(fields_856, ref_data):
@@ -98,7 +104,9 @@ def _build_electronic_access(fields_856, ref_data):
 
     for f856 in fields_856:
         uris = get_all_subfields(f856, "u")
-        public_note = get_subfield(f856, "z") or "" if _INCLUDE_PUBLIC_NOTE else ""
+        z_value = get_subfield(f856, "z") or ""
+        public_note = z_value if _INCLUDE_PUBLIC_NOTE else ""
+        materials_specification = _extract_materials_specification(z_value)
 
         for uri in uris:
             entry = {
@@ -107,9 +115,25 @@ def _build_electronic_access(fields_856, ref_data):
             }
             if public_note:
                 entry["publicNote"] = public_note
+            if materials_specification:
+                entry["materialsSpecification"] = materials_specification
             ea_list.append(entry)
 
     return ea_list
+
+
+def _extract_materials_specification(z_value):
+    """Return the portion of an 856 $z preceding ', Available', or None.
+
+    Fields whose $z starts with 'MARCIVE' never get a materialsSpecification value.
+    """
+    if not z_value or z_value.startswith("MARCIVE"):
+        return None
+    prefix, sep, _ = z_value.partition(", Available")
+    if not sep:
+        return None
+    prefix = prefix.strip()
+    return prefix or None
 
 
 def _resolve_ill_policy(policy_name, ref_data):
