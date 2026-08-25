@@ -171,13 +171,14 @@ def process_source_record(
     """
     Process one SRS source record.  Returns "processed" or "skipped".
     """
+    instance_id = source_record["externalIdsHolder"]["instanceId"]
+    instance_hrid = source_record["externalIdsHolder"].get("instanceHrid", instance_id)
+    log.info("Processing instance %s (%s)", instance_hrid, instance_id)
+
     parsed = srs_utils.get_parsed_content(source_record)
 
     if not srs_utils.has_coral_856(parsed):
         return "skipped"
-
-    instance_id = source_record["externalIdsHolder"]["instanceId"]
-    instance_hrid = source_record["externalIdsHolder"].get("instanceHrid", instance_id)
 
     # Belt-and-suspenders: confirm the instance itself is not suppressed
     instance = fc.folio_get(f"/instance-storage/instances/{instance_id}")
