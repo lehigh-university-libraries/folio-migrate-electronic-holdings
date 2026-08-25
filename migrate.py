@@ -171,7 +171,11 @@ def process_source_record(
     """
     Process one SRS source record.  Returns "processed" or "skipped".
     """
-    instance_id = source_record["externalIdsHolder"]["instanceId"]
+    instance_id = source_record.get("externalIdsHolder", {}).get("instanceId")
+    if not instance_id:
+        record_id = source_record.get("id") or source_record.get("recordId", "?")
+        log.warning("SRS record %s has no linked instanceId — skipping", record_id)
+        return "skipped"
     instance_hrid = source_record["externalIdsHolder"].get("instanceHrid", instance_id)
     log.info("Processing instance %s (%s)", instance_hrid, instance_id)
 
