@@ -370,6 +370,7 @@ def process_all(fc, ref_data, collections, args):
 
     with _unmatched_log() as unmatched_fh, _po_log() as po_fh, _rederivation_log() as rederivation_fh:
         while True:
+            log.info("Fetching batch at offset %d", offset)
             batch = fc.folio_get(
                 "/source-storage/source-records",
                 key="sourceRecords",
