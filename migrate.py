@@ -54,6 +54,14 @@ def _po_log():
     )
 
 
+def _rederivation_log():
+    return open(
+        os.environ.get("REDERIVATION_LOG", "needs_rederivation.log"),
+        "a",
+        encoding="utf-8",
+    )
+
+
 log = logging.getLogger(__name__)
 
 
@@ -166,7 +174,7 @@ def _coral_holdings_exists(fc, instance_id, coral_id, ref_data):
 
 
 def process_source_record(
-    fc, source_record, ref_data, collections, args, unmatched_fh, po_fh
+    fc, source_record, ref_data, collections, args, unmatched_fh, po_fh, rederivation_fh
 ):
     """
     Process one SRS source record.  Returns "processed" or "skipped".
@@ -256,23 +264,37 @@ def process_source_record(
             instance_hrid,
         )
 
-        parsed_record = fc.folio_get(
-            "/change-manager/parsedRecords",
-            query_params={"externalId": instance_id},
-        )
-        if parsed_record:
-            parsed_record["relatedRecordVersion"] = str(instance.get("_version"))
-            pr_id = parsed_record.get("id")
-            fc.folio_put(
-                f"/change-manager/parsedRecords/{pr_id}",
-                payload=parsed_record,
+        try:
+            parsed_record = fc.folio_get(
+                "/change-manager/parsedRecords",
+                query_params={"externalId": instance_id},
             )
-            log.info("Re-derivation triggered for instance %s", instance_hrid)
-        else:
-            log.warning(
-                "No parsed record found via change-manager for instance %s",
-                instance_hrid,
+            if parsed_record:
+                parsed_record["relatedRecordVersion"] = str(instance.get("_version"))
+                pr_id = parsed_record.get("id")
+                fc.folio_put(
+                    f"/change-manager/parsedRecords/{pr_id}",
+                    payload=parsed_record,
+                )
+                log.info("Re-derivation triggered for instance %s", instance_hrid)
+            else:
+                log.warning(
+                    "No parsed record found via change-manager for instance %s",
+                    instance_hrid,
+                )
+                rederivation_fh.write(
+                    f"{instance_hrid}\t{instance_id}\t{srs_id}\tno parsed record found\n"
+                )
+                rederivation_fh.flush()
+        except Exception:
+            # 856 fields are already stripped at this point, so on resume
+            # has_coral_856 will be False and this instance will be silently
+            # skipped — record it here so it can be manually re-triggered.
+            rederivation_fh.write(
+                f"{instance_hrid}\t{instance_id}\t{srs_id}\tre-derivation call failed\n"
             )
+            rederivation_fh.flush()
+            raise
 
     return "processed"
 
@@ -322,9 +344,16 @@ def process_single(fc, hrid, ref_data, collections, args):
         log.warning("No SRS record found for instance %s (%s)", hrid, instance_id)
         return
 
-    with _unmatched_log() as unmatched_fh, _po_log() as po_fh:
+    with _unmatched_log() as unmatched_fh, _po_log() as po_fh, _rederivation_log() as rederivation_fh:
         result = process_source_record(
-            fc, source_record, ref_data, collections, args, unmatched_fh, po_fh
+            fc,
+            source_record,
+            ref_data,
+            collections,
+            args,
+            unmatched_fh,
+            po_fh,
+            rederivation_fh,
         )
     log.info("--single result: %s for instance %s", result, hrid)
 
@@ -339,7 +368,7 @@ def process_all(fc, ref_data, collections, args):
     offset = state.resume_offset
     log.info("Starting from offset %d", offset)
 
-    with _unmatched_log() as unmatched_fh, _po_log() as po_fh:
+    with _unmatched_log() as unmatched_fh, _po_log() as po_fh, _rederivation_log() as rederivation_fh:
         while True:
             batch = fc.folio_get(
                 "/source-storage/source-records",
@@ -360,7 +389,14 @@ def process_all(fc, ref_data, collections, args):
             for sr in batch:
                 try:
                     result = process_source_record(
-                        fc, sr, ref_data, collections, args, unmatched_fh, po_fh
+                        fc,
+                        sr,
+                        ref_data,
+                        collections,
+                        args,
+                        unmatched_fh,
+                        po_fh,
+                        rederivation_fh,
                     )
                     if result == "processed":
                         processed += 1
