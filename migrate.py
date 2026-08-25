@@ -237,10 +237,19 @@ def process_source_record(
 
     # Step 3: Remove coral 856 fields from SRS, then trigger instance re-derivation
     if not args.keep_856:
-        updated = srs_utils.strip_coral_856_fields(source_record)
-        srs_id = source_record["id"]
+        # source_record may be the slim SourceRecord DTO from the batch listing
+        # endpoint (which has "recordId", not "id", and lacks fields like
+        # rawRecord/matchedId/state/generation required for a PUT). Re-fetch the
+        # full Record DTO so the strip-and-PUT always has a valid payload.
+        full_record = _get_srs_for_instance(fc, instance_id)
+        updated = srs_utils.strip_coral_856_fields(full_record)
+        srs_id = full_record["id"]
         fc.folio_put(f"/source-storage/records/{srs_id}", payload=updated)
-        log.info("Stripped 856 fields from SRS record %s (instance %s)", srs_id, instance_hrid)
+        log.info(
+            "Stripped 856 fields from SRS record %s (instance %s)",
+            srs_id,
+            instance_hrid,
+        )
 
         parsed_record = fc.folio_get(
             "/change-manager/parsedRecords",
@@ -256,7 +265,8 @@ def process_source_record(
             log.info("Re-derivation triggered for instance %s", instance_hrid)
         else:
             log.warning(
-                "No parsed record found via change-manager for instance %s", instance_hrid
+                "No parsed record found via change-manager for instance %s",
+                instance_hrid,
             )
 
     return "processed"
