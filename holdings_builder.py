@@ -10,11 +10,9 @@ import os
 
 from folio_setup import (
     NOTE_CORAL_ID,
-    NOTE_PACKAGE_NAME,
-    NOTE_PROVIDER,
-    NOTE_PROVIDER_CODE,
-    NOTE_ACCESS_METHOD,
-    NOTE_ACCESS_METHOD_CODE,
+    NOTE_AGREEMENT_UUID,
+    NOTE_AGREEMENT_NAME,
+    NOTE_SIMULTANEOUS_USERS,
 )
 from srs_utils import get_subfield, get_all_subfields
 
@@ -59,17 +57,9 @@ def _build_notes(coral_id, row, ref_data):
     notes = []
 
     _add_note(notes, note_types, NOTE_CORAL_ID, coral_id)
-    _add_note(notes, note_types, NOTE_PACKAGE_NAME, row.package_name)
-    _add_note(notes, note_types, NOTE_PROVIDER, row.provider_name)
-    _add_note(notes, note_types, NOTE_PROVIDER_CODE, row.provider_code)
-
-    if row.is_ebook:
-        if row.access_method:
-            _add_note(notes, note_types, NOTE_ACCESS_METHOD, row.access_method)
-        if row.access_method_code:
-            _add_note(
-                notes, note_types, NOTE_ACCESS_METHOD_CODE, row.access_method_code
-            )
+    _add_note(notes, note_types, NOTE_AGREEMENT_UUID, row.agreement_uuid)
+    _add_note(notes, note_types, NOTE_AGREEMENT_NAME, row.agreement_name)
+    _add_note(notes, note_types, NOTE_SIMULTANEOUS_USERS, row.simultaneous_users)
 
     return notes
 

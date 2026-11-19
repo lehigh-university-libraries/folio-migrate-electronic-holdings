@@ -7,7 +7,7 @@ One-time migration utility that converts MARC 856 fields into proper FOLIO Elect
 For every non-suppressed MARC bibliographic instance whose SRS record contains at least one `856$w` starting with `coral`:
 
 1. **Suppresses existing holdings** and marks them with the a statistical code. Holdings that have an attached purchase order are suppressed but not marked with the code; they are logged separately in `po_holdings.log`.
-2. **Creates a new Electronic holdings record** for each unique Coral ID found in the 856 fields, populated from two mapping spreadsheets in the project root (`Conversion Worksheet 2 - 1/2 - Mapping from 856$w.csv`).
+2. **Creates a new Electronic holdings record** for each unique Coral ID found in the 856 fields, populated from two mapping spreadsheets in the project root (see [Data sources](#data-sources)).
 3. **Removes the coral 856 fields** from the SRS record and triggers re-derivation of the FOLIO instance record via the change-manager API, so the instance's electronic access fields reflect the deletion (unless `--keep-856` is passed).
 
 ## Prerequisites
@@ -73,4 +73,10 @@ All four files are in append mode; each run adds to the existing content.
 
 ## Data sources
 
-The two mapping spreadsheets (`Conversion Worksheet 2 - 1 - Mapping from 856$w.csv` and `Conversion Worksheet 2 - 2 - Mapping from 856$w.csv`) live in the project root and are not committed to the repository. They map each Coral ID to the holdings field values (provider, access method, ILL policy, call number type, etc.). Two Coral IDs have conditional logic based on the value of `856$x`; this is handled automatically.
+The two mapping spreadsheets (`Conversion Worksheet 3 - Mapping from 856$w.csv` and `Conversion Worksheet 3 - Special Mapping (spec. no. of users).csv`) live in the project root and are not committed to the repository. They map each Coral ID to the holdings field values (agreement UUID, agreement name, ILL policy, call number, copy number). Columns for platform, provider type, purchase method, vendor title ID, DRM, expiration date, and public performance rights are ignored.
+
+The `EResource Simultaneous Users` note is written in only two cases:
+- **Sheet-1 rows whose Simultaneous Users cell is `{856$x}`:** the note holds the `856$x` value.
+- **Special-mapping Coral IDs:** the row is picked by whether `856$x` contains `Unlimited`. If it does, the note is the literal `Unlimited Users`. If it doesn't, the note holds the `856$x` value.
+
+This is handled automatically. All other rows get no Simultaneous Users note.
