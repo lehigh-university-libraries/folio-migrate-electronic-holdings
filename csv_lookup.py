@@ -49,7 +49,7 @@ class CollectionRow:
     agreement_uuid: str
     agreement_name: str
     ill_policy: str  # "" when not specified
-    simultaneous_users: str = ""  # only set from 856$x for sentinel/conditional rows
+    simultaneous_users: str = ""  # 856$x for sentinel/conditional rows; sheet-2 Unlimited value
 
 
 def _read_csv_rows(path):
@@ -77,6 +77,8 @@ def load_collections(sheet1_path=SHEET1_PATH, sheet2_path=SHEET2_PATH):
         cid = _cell(row, 0)
         if not cid:
             continue
+        # Sheet-1 simultaneous-users text is never written; only sentinel rows
+        # get a value (the $x value, at lookup time).
         sheet1[cid] = CollectionRow(
             coral_id=cid,
             call_number=_cell(row, 18),
@@ -129,8 +131,9 @@ class CollectionLookup:
         The Unlimited row's simultaneous_users is the literal sheet value
         ("Unlimited Users"); the non-Unlimited row's is set to the $x value.
 
-        Sheet-1 IDs whose simultaneous-users cell is the "{856$x}" sentinel
-        (coral-175, coral-533) also get simultaneous_users set to the $x value.
+        Sheet-1 rows never use their simultaneous-users cell text.  Only rows
+        whose cell is the "{856$x}" sentinel (coral-175, coral-533) get
+        simultaneous_users, set to the $x value.
         """
         x_value = (x_value or "").strip()
 

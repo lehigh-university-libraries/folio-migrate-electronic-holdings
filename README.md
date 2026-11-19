@@ -76,7 +76,7 @@ All four files are in append mode; each run adds to the existing content.
 The two mapping spreadsheets (`Conversion Worksheet 3 - Mapping from 856$w.csv` and `Conversion Worksheet 3 - Special Mapping (spec. no. of users).csv`) live in the project root and are not committed to the repository. They map each Coral ID to the holdings field values (agreement UUID, agreement name, ILL policy, call number, copy number). Columns for platform, provider type, purchase method, vendor title ID, DRM, expiration date, and public performance rights are ignored.
 
 The `EResource Simultaneous Users` note is written in only two cases:
-- **Sheet-1 rows whose Simultaneous Users cell is `{856$x}`:** the note holds the `856$x` value.
+- **Sheet-1 rows whose Simultaneous Users cell is `{856$x}`:** the note holds the `856$x` value. Other sheet-1 Simultaneous Users text is never written.
 - **Special-mapping Coral IDs:** the row is picked by whether `856$x` contains `Unlimited`. If it does, the note is the literal `Unlimited Users`. If it doesn't, the note holds the `856$x` value.
 
-This is handled automatically. All other rows get no Simultaneous Users note.
+This is handled automatically.
