@@ -6,7 +6,7 @@ One-time migration utility that converts MARC 856 fields into proper FOLIO Elect
 
 For every non-suppressed MARC bibliographic instance whose SRS record contains at least one `856$w` starting with `coral`:
 
-1. **Suppresses existing holdings** and marks them with the a statistical code. Holdings that have an attached purchase order are suppressed but not marked with the code; they are logged separately in `po_holdings.log`.
+1. **Suppresses existing holdings** and marks them with the a statistical code. Holdings that have an attached purchase order are suppressed but not marked with the code; they are logged separately in `po_holdings.log`. Electronic holdings that this migration already created for one of the instance's coral IDs (for example, from an earlier run with `--keep-856`) are left alone, so re-running a record does not change anything.
 2. **Creates a new Electronic holdings record** for each unique Coral ID found in the 856 fields, populated from two mapping spreadsheets in the project root (see [Data sources](#data-sources)).
 3. **Removes the coral 856 fields** from the SRS record and triggers re-derivation of the FOLIO instance record via the change-manager API, so the instance's electronic access fields reflect the deletion (unless `--keep-856` is passed).
 

@@ -140,6 +140,21 @@ def _clean_holdings_for_put(holdings):
     return {k: v for k, v in holdings.items() if k not in _HOLDINGS_PUT_STRIP}
 
 
+def _coral_ids_on_holdings(holdings, ref_data):
+    """
+    Return the set of coral IDs recorded on an Electronic holdings record created
+    by this migration (empty set for any other holdings record).
+    """
+    if holdings.get("permanentLocationId") != ref_data["location_electronic"]:
+        return set()
+    note_type_id = ref_data["holdings_note_types"].get(folio_setup.NOTE_CORAL_ID, "")
+    return {
+        note.get("note", "").strip()
+        for note in holdings.get("notes", [])
+        if note.get("holdingsNoteTypeId") == note_type_id
+    }
+
+
 def _coral_holdings_exists(fc, instance_id, coral_id, ref_data):
     """
     Return True if an Electronic holdings record for this coral_id already exists
@@ -157,15 +172,7 @@ def _coral_holdings_exists(fc, instance_id, coral_id, ref_data):
             "limit": 200,
         },
     )
-    note_type_id = ref_data["holdings_note_types"].get(folio_setup.NOTE_CORAL_ID, "")
-    for h in existing:
-        for note in h.get("notes", []):
-            if (
-                note.get("holdingsNoteTypeId") == note_type_id
-                and note.get("note", "").strip() == coral_id
-            ):
-                return True
-    return False
+    return any(coral_id in _coral_ids_on_holdings(h, ref_data) for h in existing)
 
 
 # ---------------------------------------------------------------------------
@@ -219,8 +226,11 @@ def process_source_record(
         log.info("[DRY-RUN] Would process instance %s (%s)", instance_hrid, instance_id)
         return "processed"
 
-    # Step 1: Suppress existing holdings (skip any that have a PO)
-    _suppress_existing_holdings(fc, instance_id, instance_hrid, ref_data, po_fh)
+    # Step 1: Suppress existing holdings (skip any that have a PO), leaving alone
+    # any Electronic holdings this migration already created for these coral IDs
+    _suppress_existing_holdings(
+        fc, instance_id, instance_hrid, ref_data, po_fh, set(groups)
+    )
 
     # Step 2: Create new Electronic holdings for each matched coral ID
     for coral_id, group_fields in groups.items():
@@ -299,13 +309,23 @@ def process_source_record(
     return "processed"
 
 
-def _suppress_existing_holdings(fc, instance_id, instance_hrid, ref_data, po_fh):
+def _suppress_existing_holdings(
+    fc, instance_id, instance_hrid, ref_data, po_fh, coral_ids
+):
     delete_h_code = ref_data["statistical_code_delete_h"]
     existing = _holdings_for_instance(fc, instance_id)
 
     for holdings in existing:
         hid = holdings["id"]
         hhrid = holdings.get("hrid", hid)
+
+        if _coral_ids_on_holdings(holdings, ref_data) & coral_ids:
+            log.info(
+                "Holdings %s on instance %s was created by this migration — not suppressing",
+                hhrid,
+                instance_hrid,
+            )
+            continue
 
         has_po = _holdings_has_po(fc, hid)
         if has_po:
